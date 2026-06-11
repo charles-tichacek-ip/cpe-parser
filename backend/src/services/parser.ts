@@ -36,17 +36,27 @@ Return ONLY valid JSON matching this exact shape — no markdown, no preamble:
   "low_conf_fields": ["array of field names you were uncertain about"]
 }
 
-DESIGNATION RULES:
-- CIA (IIA): Internal audit, risk management, control environment, governance, ethics, fraud
-- CISA (ISACA): IS audit process, IT governance, systems acquisition/development/implementation, IT operations, protection of information assets, cybersecurity
-- CPA (Ontario): Accounting, financial reporting, tax, assurance, finance, business law, ethics, management — content must be relevant to CPA competencies
-- CITP: Information technology, data management, cybersecurity, emerging tech, digital transformation
-- A single course can and often should map to multiple designations — e.g. IT audit maps to both CISA and CIA
-- Ethics courses apply to all held designations
+DESIGNATION RULES — INCLUDE BROADLY:
+Default to including CIA, CISA, CPA, and CITP unless the content is clearly irrelevant to a designation. Most professional development, leadership, ethics, technology, audit, finance, and business content qualifies for all four. Err on the side of inclusion — the reviewer will remove designations that don't apply.
 
-VERIFIABILITY (CPA Ontario):
-- is_verifiable = true: has certificate, attendance record, or completion confirmation from provider
-- is_verifiable = false: on-the-job training, self-study without exam, casual reading
+Only exclude a designation if the content is unambiguously outside its scope:
+- Exclude CIA only if content has zero relevance to audit, risk, governance, or internal controls
+- Exclude CISA only if content has zero relevance to IT, systems, data, or information security
+- Exclude CPA only if content has zero relevance to business, finance, accounting, or professional competency
+- Exclude CITP only if content has zero relevance to technology, data, or digital topics
+
+CATEGORIES — BE SPECIFIC AND STRICT:
+For each included designation, assign the most specific category:
+- CIA: "Technical" | "Ethics" | "Other"
+- CISA: "IS Audit Process" | "IT Governance" | "Systems Acquisition" | "IT Operations" | "Protection of Information Assets"
+- CPA: "Verifiable" | "Ethics" | "Other"
+- CITP: "Technical" | "Management" | "Other"
+
+Only mark a category as "Ethics" if the course is explicitly about professional ethics — not just governance or conduct.
+
+VERIFIABILITY (CPA Ontario) — BE STRICT:
+- is_verifiable = true ONLY if there is an explicit certificate of completion, attendance confirmation, or formal assessment from a recognized provider
+- is_verifiable = false for: self-study without exam, informal learning, on-the-job activities, reading, internal training without documentation
 
 CONFIDENCE:
 - 0.9+: clear certificate with all fields explicit
