@@ -17,10 +17,10 @@ await app.register(multipart, {
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB — generous for a ZIP
 });
 
-await app.register(uploadRoutes);
-await app.register(stagingRoutes);
-await app.register(recordsRoutes);
-await app.register(downloadRoutes);
+await app.register(uploadRoutes, { prefix: '/api' });
+await app.register(stagingRoutes, { prefix: '/api' });
+await app.register(recordsRoutes, { prefix: '/api' });
+await app.register(downloadRoutes, { prefix: '/api' });
 
 app.get('/health', async () => ({ ok: true }));
 
