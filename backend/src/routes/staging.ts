@@ -57,7 +57,7 @@ export async function stagingRoutes(app: FastifyInstance) {
       if (staged.is_duplicate) return reply.code(409).send({ error: 'Duplicate — cannot accept' });
 
       // Allow overriding parsed fields from request body
-      const data = { ...staged.parsed_data, ...request.body };
+      const data = { ...(staged.parsed_data as Record<string, unknown>), ...(request.body as Record<string, unknown>) };
 
       // Insert into cpe_records
       const [record] = await query<{ id: string }>(
@@ -84,9 +84,10 @@ export async function stagingRoutes(app: FastifyInstance) {
       );
 
       // Insert designation rows
-      const designations: string[] = data.designations ?? [];
+      const designations: string[] = (data.designations as string[]) ?? [];
+      const categories = (data.categories as Record<string, string> | undefined) ?? {};
       for (const desig of designations) {
-        const category = data.categories?.[desig] ?? null;
+        const category = categories[desig] ?? null;
         const hours = data.credit_hours ?? null;
         await query(
           `INSERT INTO cpe_designations (cpe_record_id, designation, category, hours_claimed)
