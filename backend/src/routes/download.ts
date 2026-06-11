@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { query } from '../lib/db.js';
+import { getSignedDownloadUrl } from '../lib/storage.js';
 import { basicAuth } from '../middleware/auth.js';
 import archiver from 'archiver';
 
@@ -59,7 +60,7 @@ export async function downloadRoutes(app: FastifyInstance) {
       if (!record.certificate_url) continue;
 
       try {
-        const storageUrl = `${process.env.STORAGE_BASE_URL}/${record.certificate_url}`;
+        const storageUrl = await getSignedDownloadUrl(record.certificate_url);
         const res = await fetch(storageUrl);
         if (!res.ok) continue;
 

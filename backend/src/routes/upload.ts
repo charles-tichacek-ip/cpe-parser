@@ -4,6 +4,7 @@ import pdfParse from 'pdf-parse';
 import unzipper from 'unzipper';
 import { Readable } from 'stream';
 import { query, queryOne } from '../lib/db.js';
+import { uploadFile } from '../lib/storage.js';
 import { parseCPEText, type ParsedCPE } from '../services/parser.js';
 import { basicAuth } from '../middleware/auth.js';
 
@@ -67,9 +68,8 @@ async function processPDFBuffer(
   // 5. Build clean filename from parsed data
   const cleanFilename = buildFilename(parsed);
 
-  // 6. Store in Railway Storage (stubbed — swap in real storage client)
-  // const certificateUrl = await uploadToStorage(buffer, cleanFilename);
-  const certificateUrl = `pending/${hash}/${cleanFilename}`;
+  // 6. Upload to Railway Storage
+  const certificateUrl = await uploadFile(buffer, `certificates/${hash}/${cleanFilename}`);
 
   // 7. Insert into staging
   const [row] = await query<{ id: string }>(
