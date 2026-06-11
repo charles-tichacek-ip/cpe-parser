@@ -55,7 +55,7 @@ export default function DetailPage() {
           {record.certificate_url && (
             <a
               className="btn-ghost"
-              href={`/api/certificate/${record.id}`}
+              href={`${import.meta.env.VITE_API_URL ?? ''}/api/certificate/${record.id}`}
               target="_blank"
               rel="noreferrer"
             >

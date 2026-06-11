@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { query, queryOne } from '../lib/db.js';
 import { basicAuth } from '../middleware/auth.js';
+import { getSignedDownloadUrl } from '../lib/storage.js';
 
 export async function recordsRoutes(app: FastifyInstance) {
   app.addHook('preHandler', basicAuth);
@@ -110,4 +111,15 @@ export async function recordsRoutes(app: FastifyInstance) {
       return reply.send({ updated: true });
     }
   );
+
+  // GET /certificate/:id — redirect to signed PDF URL
+  app.get<{ Params: { id: string } }>('/certificate/:id', async (request, reply) => {
+    const record = await queryOne<{ certificate_url: string }>(
+      'SELECT certificate_url FROM cpe_records WHERE id = $1',
+      [request.params.id]
+    );
+    if (!record?.certificate_url) return reply.code(404).send({ error: 'Not found' });
+    const url = await getSignedDownloadUrl(record.certificate_url);
+    return reply.redirect(url);
+  });
 }
