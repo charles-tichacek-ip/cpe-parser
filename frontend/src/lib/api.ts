@@ -1,4 +1,4 @@
-const BASE = '/api';
+const BASE = `${import.meta.env.VITE_API_URL ?? ''}/api`;
 
 function authHeaders(): Record<string, string> {
   const user = import.meta.env.VITE_AUTH_USER ?? 'admin';
