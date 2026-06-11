@@ -10,12 +10,7 @@ export async function stagingRoutes(app: FastifyInstance) {
     const rows = await query(
       `SELECT id, original_filename, confidence, low_conf_fields,
               is_duplicate, duplicate_of, status, created_at,
-              parsed_data->>'course_title' AS course_title,
-              parsed_data->>'completion_date' AS completion_date,
-              parsed_data->>'provider' AS provider,
-              parsed_data->>'credit_hours' AS credit_hours,
-              parsed_data->'designations' AS designations,
-              certificate_url
+              certificate_url, parsed_data
        FROM cpe_staging
        WHERE status = 'pending'
        ORDER BY created_at DESC`
