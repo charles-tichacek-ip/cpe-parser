@@ -53,6 +53,11 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason }),
       }),
+    acceptAll: (year?: number) => request<{ accepted: number }>('/staging/accept-all', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ year }),
+    }),
   },
 
   records: {

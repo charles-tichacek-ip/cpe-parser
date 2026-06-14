@@ -119,6 +119,67 @@ export async function stagingRoutes(app: FastifyInstance) {
     }
   );
 
+  // POST /staging/accept-all — bulk accept pending non-duplicate rows, optionally filtered by year
+  app.post<{ Body: { year?: number } }>('/staging/accept-all', async (request, reply) => {
+    const { year } = request.body ?? {};
+    const rows = await query<{ id: string }>(
+      year
+        ? `SELECT id FROM cpe_staging WHERE status = 'pending' AND is_duplicate = false
+           AND (parsed_data->>'completion_date') LIKE $1`
+        : `SELECT id FROM cpe_staging WHERE status = 'pending' AND is_duplicate = false`,
+      year ? [`${year}-%`] : []
+    );
+
+    let accepted = 0;
+    for (const { id } of rows) {
+      const staged = await queryOne<any>(
+        `SELECT * FROM cpe_staging WHERE id = $1`,
+        [id]
+      );
+      if (!staged) continue;
+      const data = staged.parsed_data as Record<string, any>;
+
+      try {
+        const [record] = await query<{ id: string }>(
+          `INSERT INTO cpe_records
+            (provider, course_title, completion_date, credit_hours,
+             delivery_method, is_verifiable, is_ethics, notes, raw_input,
+             file_hash, certificate_url, original_filename, confidence)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+           RETURNING id`,
+          [
+            data.provider, data.course_title, data.completion_date || null,
+            data.credit_hours, data.delivery_method, data.is_verifiable ?? true,
+            data.is_ethics ?? false, data.notes, staged.raw_extract,
+            staged.file_hash, staged.certificate_url, staged.original_filename,
+            staged.confidence,
+          ]
+        );
+
+        const designations: string[] = (data.designations as string[]) ?? [];
+        const categories = (data.categories as Record<string, string>) ?? {};
+        for (const desig of designations) {
+          await query(
+            `INSERT INTO cpe_designations (cpe_record_id, designation, category, hours_claimed)
+             VALUES ($1,$2,$3,$4)`,
+            [record.id, desig, categories[desig] ?? null, data.credit_hours ?? null]
+          );
+        }
+
+        await query(
+          `UPDATE cpe_staging SET status = 'accepted', reviewed_at = now() WHERE id = $1`,
+          [id]
+        );
+        accepted++;
+      } catch {
+        // Skip rows that fail (e.g. duplicate file_hash already in records)
+        continue;
+      }
+    }
+
+    return reply.send({ accepted });
+  });
+
   // GET /staging/:id/certificate — redirect to signed PDF URL
   app.get<{ Params: { id: string } }>('/staging/:id/certificate', async (request, reply) => {
     const row = await queryOne<{ certificate_url: string }>(

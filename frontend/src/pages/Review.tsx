@@ -32,6 +32,8 @@ export default function ReviewPage() {
   const [edits, setEdits] = useState<any>({});
   const [saving, setSaving] = useState(false);
   const [actionMsg, setActionMsg] = useState('');
+  const [bulkYear, setBulkYear] = useState<string>('');
+  const [bulkMsg, setBulkMsg] = useState('');
 
   useEffect(() => {
     if (initialResults.length > 0) {
@@ -115,9 +117,27 @@ export default function ReviewPage() {
           <span className="eyebrow">Review</span>
           <h1>Staged Records <span className="count-badge">{pending.length} pending</span></h1>
         </div>
-        <button className="btn-ghost" onClick={() => navigate('/records')}>
-          View Records →
-        </button>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {bulkMsg && <span style={{ fontSize: 12, color: 'var(--green)', fontFamily: 'var(--mono)' }}>{bulkMsg}</span>}
+          <select className="filter-select" value={bulkYear} onChange={e => setBulkYear(e.target.value)}>
+            <option value="">All years</option>
+            {[2021,2022,2023,2024,2025,2026].map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+          <button className="btn-ghost" onClick={async () => {
+            if (!confirm(`Accept all pending${bulkYear ? ` ${bulkYear}` : ''} records?`)) return;
+            const { accepted } = await api.staging.acceptAll(bulkYear ? Number(bulkYear) : undefined);
+            setBulkMsg(`Accepted ${accepted}`);
+            const data = await api.staging.list();
+            setRows(data);
+            setSelected(data[0] ?? null);
+            setEdits(data[0]?.parsed_data ?? {});
+          }}>
+            Accept All {bulkYear || ''}
+          </button>
+          <button className="btn-ghost" onClick={() => navigate('/records')}>
+            View Records →
+          </button>
+        </div>
       </div>
 
       <div className="review-layout">
