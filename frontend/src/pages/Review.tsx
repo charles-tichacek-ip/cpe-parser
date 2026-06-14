@@ -121,7 +121,10 @@ export default function ReviewPage() {
           {bulkMsg && <span style={{ fontSize: 12, color: 'var(--green)', fontFamily: 'var(--mono)' }}>{bulkMsg}</span>}
           <select className="filter-select" value={bulkYear} onChange={e => setBulkYear(e.target.value)}>
             <option value="">All years</option>
-            {[2021,2022,2023,2024,2025,2026].map(y => <option key={y} value={y}>{y}</option>)}
+            {[...new Set(pending
+              .map(r => r.parsed_data?.completion_date?.slice(0, 4))
+              .filter(Boolean)
+            )].sort().map(y => <option key={y} value={y}>{y}</option>)}
           </select>
           <button className="btn-ghost" onClick={async () => {
             if (!confirm(`Accept all pending${bulkYear ? ` ${bulkYear}` : ''} records?`)) return;
