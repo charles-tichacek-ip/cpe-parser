@@ -68,9 +68,17 @@ export async function recordsRoutes(app: FastifyInstance) {
       };
     });
 
-    // CISA 3-year cycle totals (hardcoded cycle: 2024-2026, 2021-2023, etc.)
-    const cisaCycleStart = (year: number) => year - ((year - 2019) % 3);
-    const currentCycleStart = cisaCycleStart(currentYear);
+    // CISA 3-year cycles based on actual ISACA renewal schedule
+    // Cycles: ...2022-2025 (COVID extension), 2026-2028, 2029-2031...
+    const cisaCycles = [
+      { start: 2022, end: 2025 },
+      { start: 2026, end: 2028 },
+      { start: 2029, end: 2031 },
+      { start: 2032, end: 2034 },
+    ];
+    const currentCycle = cisaCycles.find(c => currentYear >= c.start && currentYear <= c.end)
+      ?? { start: 2026, end: 2028 };
+    const currentCycleStart = currentCycle.start;
     const cisaCycle = await query(
       `SELECT
          SUM(d.hours_claimed)::numeric AS cycle_hours,
@@ -80,14 +88,14 @@ export async function recordsRoutes(app: FastifyInstance) {
        WHERE d.designation = 'CISA'
          AND r.completion_date IS NOT NULL
          AND EXTRACT(YEAR FROM r.completion_date) BETWEEN $1 AND $2`,
-      [currentCycleStart, currentCycleStart + 2]
+      [currentCycleStart, currentCycle.end]
     );
 
     return reply.send({
       rows: summary,
       cisa_cycle: {
         start: currentCycleStart,
-        end: currentCycleStart + 2,
+        end: currentCycle.end,
         hours: Number(cisaCycle[0]?.cycle_hours ?? 0),
         target: 120,
       },
