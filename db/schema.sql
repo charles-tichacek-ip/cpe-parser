@@ -15,6 +15,7 @@ CREATE TABLE cpe_records (
   credit_hours     NUMERIC(5,2),
   delivery_method  TEXT,
   is_verifiable    BOOLEAN DEFAULT true,
+  is_ethics        BOOLEAN DEFAULT false,
   notes            TEXT,
   raw_input        TEXT,
   file_hash        TEXT UNIQUE,         -- SHA-256 of original PDF bytes

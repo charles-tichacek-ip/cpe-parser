@@ -236,23 +236,16 @@ export default function ReviewPage() {
                 </div>
               </Field>
 
-              {(edits.designations ?? []).filter((d: string) => DESIG_CATEGORIES[d]).length > 0 && (
-                <Field label="Categories">
-                  <div className="desig-categories">
-                    {(edits.designations ?? []).filter((d: string) => DESIG_CATEGORIES[d]).map((d: string) => (
-                      <div key={d} className="desig-cat-row">
-                        <span className="desig-cat-label">{d}</span>
-                        <select
-                          className="field-input"
-                          value={(edits.categories ?? {})[d] ?? ''}
-                          onChange={e => updateEdit('categories', { ...(edits.categories ?? {}), [d]: e.target.value })}
-                        >
-                          <option value="">— select —</option>
-                          {DESIG_CATEGORIES[d].map(c => <option key={c}>{c}</option>)}
-                        </select>
-                      </div>
-                    ))}
-                  </div>
+              {(edits.designations ?? []).some((d: string) => d === 'CIA' || d === 'CPA') && (
+                <Field label="Ethics Hours">
+                  <label className="toggle">
+                    <input
+                      type="checkbox"
+                      checked={edits.is_ethics ?? false}
+                      onChange={e => updateEdit('is_ethics', e.target.checked)}
+                    />
+                    <span>Counts as ethics hours (CIA + CPA)</span>
+                  </label>
                 </Field>
               )}
 

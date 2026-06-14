@@ -59,9 +59,9 @@ export async function stagingRoutes(app: FastifyInstance) {
       const [record] = await query<{ id: string }>(
         `INSERT INTO cpe_records
           (provider, course_title, completion_date, credit_hours,
-           delivery_method, is_verifiable, notes, raw_input,
+           delivery_method, is_verifiable, is_ethics, notes, raw_input,
            file_hash, certificate_url, original_filename, confidence)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
          RETURNING id`,
         [
           data.provider,
@@ -70,6 +70,7 @@ export async function stagingRoutes(app: FastifyInstance) {
           data.credit_hours,
           data.delivery_method,
           data.is_verifiable ?? true,
+          data.is_ethics ?? false,
           data.notes,
           staged.raw_extract,
           staged.file_hash,

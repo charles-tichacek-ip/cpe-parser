@@ -44,6 +44,7 @@ Only exclude a designation if the content is unambiguously outside its scope:
 - Exclude CISA only if content has zero relevance to IT, systems, data, or information security
 - Exclude CPA only if content has zero relevance to business, finance, accounting, or professional competency
 - Exclude CITP only if content has zero relevance to technology, data, or digital topics
+- Include BABL for: AI governance, AI risk management, AI auditing, emerging technology, data ethics, algorithmic accountability, or any content touching AI/ML systems and their oversight
 
 CATEGORIES — BE SPECIFIC AND STRICT:
 For each included designation, assign the most specific category:
