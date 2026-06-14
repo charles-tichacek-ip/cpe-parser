@@ -68,7 +68,30 @@ export async function recordsRoutes(app: FastifyInstance) {
       };
     });
 
-    return reply.send(summary);
+    // CISA 3-year cycle totals (hardcoded cycle: 2024-2026, 2021-2023, etc.)
+    const cisaCycleStart = (year: number) => year - ((year - 2019) % 3);
+    const currentCycleStart = cisaCycleStart(currentYear);
+    const cisaCycle = await query(
+      `SELECT
+         SUM(d.hours_claimed)::numeric AS cycle_hours,
+         COUNT(DISTINCT r.id)::int AS course_count
+       FROM cpe_designations d
+       JOIN cpe_records r ON r.id = d.cpe_record_id
+       WHERE d.designation = 'CISA'
+         AND r.completion_date IS NOT NULL
+         AND EXTRACT(YEAR FROM r.completion_date) BETWEEN $1 AND $2`,
+      [currentCycleStart, currentCycleStart + 2]
+    );
+
+    return reply.send({
+      rows: summary,
+      cisa_cycle: {
+        start: currentCycleStart,
+        end: currentCycleStart + 2,
+        hours: Number(cisaCycle[0]?.cycle_hours ?? 0),
+        target: 120,
+      },
+    });
   });
 
   // GET /records/:id — single record with designations

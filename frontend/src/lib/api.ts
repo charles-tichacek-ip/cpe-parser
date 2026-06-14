@@ -62,7 +62,7 @@ export const api = {
 
   records: {
     list: () => request<any[]>('/records'),
-    summary: () => request<any[]>('/records/summary'),
+    summary: () => request<{ rows: any[]; cisa_cycle: { start: number; end: number; hours: number; target: number } }>('/records/summary'),
     get: (id: string) => request<any>(`/records/${id}`),
     update: (id: string, data: any) =>
       request(`/records/${id}`, {

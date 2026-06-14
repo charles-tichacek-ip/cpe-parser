@@ -3,8 +3,8 @@ import { api } from '../lib/api';
 
 const TARGETS: Record<string, { annual: number; verifiable?: number; cycle: string }> = {
   CIA:  { annual: 40, cycle: 'Annual · 40 hrs' },
-  CISA: { annual: 20, cycle: 'Annual · 20 hrs (120 over 3 yrs)' },
-  CPA:  { annual: 20, verifiable: 10, cycle: 'Annual · 20 hrs (10 verifiable, 4 ethics over 3 yrs)' },
+  CISA: { annual: 20, cycle: 'Annual · 20 hrs min · 120 hrs per 3-yr cycle' },
+  CPA:  { annual: 20, verifiable: 10, cycle: 'Annual · 20 hrs (10 verifiable)' },
   CITP: { annual: 20, cycle: 'Annual · 20 hrs' },
   BABL: { annual: 20, cycle: 'Annual · 20 hrs' },
 };
@@ -22,12 +22,14 @@ function ProgressBar({ value, target, color }: { value: number; target: number; 
 
 export default function ReportingPage() {
   const [summary, setSummary] = useState<any[]>([]);
+  const [cisaCycle, setCisaCycle] = useState<{ start: number; end: number; hours: number; target: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [year, setYear] = useState(CURRENT_YEAR);
 
   useEffect(() => {
     api.records.summary().then(data => {
-      setSummary(data);
+      setSummary(data.rows);
+      setCisaCycle(data.cisa_cycle);
       setLoading(false);
     });
   }, []);
@@ -119,6 +121,26 @@ export default function ReportingPage() {
           );
         })}
       </div>
+
+      {/* CISA 3-year cycle */}
+      {cisaCycle && (
+        <div className="compliance-card" style={{ marginBottom: 32, maxWidth: 400 }}>
+          <div className="card-top">
+            <div className="desig-name">CISA 3-Year Cycle</div>
+            <div className="status-dot" style={{ background: cisaCycle.hours >= cisaCycle.target ? '#22c55e' : '#f59e0b' }} />
+          </div>
+          <div className="card-cycle">{cisaCycle.start}–{cisaCycle.end} · 120 hr target</div>
+          <div className="metric-row">
+            <span className="metric-label">Cycle hours</span>
+            <span className="metric-value">{cisaCycle.hours.toFixed(1)} / {cisaCycle.target}</span>
+          </div>
+          <ProgressBar value={cisaCycle.hours} target={cisaCycle.target}
+            color={cisaCycle.hours >= cisaCycle.target ? '#22c55e' : '#6366f1'} />
+          <div className="card-footer">
+            {Math.max(0, cisaCycle.target - cisaCycle.hours).toFixed(1)} hrs remaining in cycle
+          </div>
+        </div>
+      )}
 
       {/* Year-over-year table */}
       {years.length > 0 && (
