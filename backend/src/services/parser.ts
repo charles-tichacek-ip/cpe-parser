@@ -54,9 +54,8 @@ For each included designation, assign the most specific category:
 
 Only mark a category as "Ethics" if the course is explicitly about professional ethics — not just governance or conduct.
 
-VERIFIABILITY (CPA Ontario) — BE STRICT:
-- is_verifiable = true ONLY if there is an explicit certificate of completion, attendance confirmation, or formal assessment from a recognized provider
-- is_verifiable = false for: self-study without exam, informal learning, on-the-job activities, reading, internal training without documentation
+VERIFIABILITY (CPA Ontario):
+- Always set is_verifiable = true. Every document in this system is a certificate of completion or formal provider confirmation.
 
 CONFIDENCE:
 - 0.9+: clear certificate with all fields explicit

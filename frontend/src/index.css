@@ -325,6 +325,10 @@ select.field-input option { background: var(--surface); }
 
 .empty-state { padding: 40px; text-align: center; color: var(--text-2); font-size: 13px; }
 
+.desig-categories { display: flex; flex-direction: column; gap: 8px; }
+.desig-cat-row { display: grid; grid-template-columns: 52px 1fr; gap: 10px; align-items: center; }
+.desig-cat-label { font-family: var(--mono); font-size: 11px; font-weight: 600; color: #a5b4fc; }
+
 /* ── Reporting page ── */
 .year-tabs { display: flex; gap: 4px; margin-bottom: 24px; }
 .year-tab {

@@ -3,6 +3,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { api, openCertificate } from '../lib/api';
 
 const DESIGNATIONS = ['CIA', 'CISA', 'CPA', 'CITP', 'BABL'];
+
+const DESIG_CATEGORIES: Record<string, string[]> = {
+  CIA:  ['Technical', 'Ethics', 'Other'],
+  CISA: ['IS Audit Process', 'IT Governance', 'Systems Acquisition', 'IT Operations', 'Protection of Information Assets'],
+  CPA:  ['Verifiable', 'Ethics', 'Other'],
+  CITP: ['Technical', 'Management', 'Other'],
+  BABL: ['Technical', 'Other'],
+};
 const DELIVERY_METHODS = [
   'Live Webinar', 'On-Demand / Self-Study', 'In-Person',
   'Conference', 'University Course', 'Other',
@@ -228,12 +236,25 @@ export default function ReviewPage() {
                 </div>
               </Field>
 
-              <Field label="Verifiable (CPA Ontario)">
-                <label className="toggle">
-                  <input type="checkbox" checked={edits.is_verifiable ?? true} onChange={e => updateEdit('is_verifiable', e.target.checked)} />
-                  <span>{edits.is_verifiable ? 'Verifiable' : 'Non-verifiable'}</span>
-                </label>
-              </Field>
+              {(edits.designations ?? []).filter((d: string) => DESIG_CATEGORIES[d]).length > 0 && (
+                <Field label="Categories">
+                  <div className="desig-categories">
+                    {(edits.designations ?? []).filter((d: string) => DESIG_CATEGORIES[d]).map((d: string) => (
+                      <div key={d} className="desig-cat-row">
+                        <span className="desig-cat-label">{d}</span>
+                        <select
+                          className="field-input"
+                          value={(edits.categories ?? {})[d] ?? ''}
+                          onChange={e => updateEdit('categories', { ...(edits.categories ?? {}), [d]: e.target.value })}
+                        >
+                          <option value="">— select —</option>
+                          {DESIG_CATEGORIES[d].map(c => <option key={c}>{c}</option>)}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                </Field>
+              )}
 
               <Field label="Notes">
                 <textarea className="field-input" rows={2} value={edits.notes ?? ''} onChange={e => updateEdit('notes', e.target.value)} />
