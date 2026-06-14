@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { api } from '../lib/api';
+import { api, certificateUrl } from '../lib/api';
 
 export default function DetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -55,7 +55,7 @@ export default function DetailPage() {
           {record.certificate_url && (
             <a
               className="btn-ghost"
-              href={`${import.meta.env.VITE_API_URL ?? ''}/api/certificate/${record.id}`}
+              href={certificateUrl('record', record.id)}
               target="_blank"
               rel="noreferrer"
             >

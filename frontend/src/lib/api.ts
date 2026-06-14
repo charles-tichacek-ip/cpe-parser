@@ -1,4 +1,6 @@
 const BASE = `${import.meta.env.VITE_API_URL ?? ''}/api`;
+export const certificateUrl = (type: 'record' | 'staging', id: string) =>
+  type === 'record' ? `${BASE}/certificate/${id}` : `${BASE}/staging/${id}/certificate`;
 
 function authHeaders(): Record<string, string> {
   const user = import.meta.env.VITE_AUTH_USER ?? 'admin';

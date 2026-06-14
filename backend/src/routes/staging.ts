@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { query, queryOne } from '../lib/db.js';
+import { getSignedDownloadUrl } from '../lib/storage.js';
 import { basicAuth } from '../middleware/auth.js';
 
 export async function stagingRoutes(app: FastifyInstance) {
@@ -116,4 +117,15 @@ export async function stagingRoutes(app: FastifyInstance) {
       return reply.send({ rejected: true });
     }
   );
+
+  // GET /staging/:id/certificate — redirect to signed PDF URL
+  app.get<{ Params: { id: string } }>('/staging/:id/certificate', async (request, reply) => {
+    const row = await queryOne<{ certificate_url: string }>(
+      'SELECT certificate_url FROM cpe_staging WHERE id = $1',
+      [request.params.id]
+    );
+    if (!row?.certificate_url) return reply.code(404).send({ error: 'Not found' });
+    const url = await getSignedDownloadUrl(row.certificate_url);
+    return reply.redirect(url);
+  });
 }

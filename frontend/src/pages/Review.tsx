@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { api } from '../lib/api';
+import { api, certificateUrl } from '../lib/api';
 
 const DESIGNATIONS = ['CIA', 'CISA', 'CPA', 'CITP', 'BABL'];
 const DELIVERY_METHODS = [
@@ -186,7 +186,7 @@ export default function ReviewPage() {
               {selected.certificate_url && (
                 <a
                   className="btn-ghost small"
-                  href={`/api/certificate/${selected.id}`}
+                  href={certificateUrl('staging', selected.id)}
                   target="_blank"
                   rel="noreferrer"
                 >
