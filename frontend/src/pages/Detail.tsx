@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { api, certificateUrl } from '../lib/api';
+import { api, openCertificate } from '../lib/api';
 
 export default function DetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -53,14 +53,12 @@ export default function DetailPage() {
         </div>
         <div className="detail-top-actions">
           {record.certificate_url && (
-            <a
+            <button
               className="btn-ghost"
-              href={certificateUrl('record', record.id)}
-              target="_blank"
-              rel="noreferrer"
+              onClick={() => openCertificate('record', record.id)}
             >
               Open Certificate ↗
-            </a>
+            </button>
           )}
           {!editing && (
             <button className="btn-primary small" onClick={() => setEditing(true)}>Edit</button>

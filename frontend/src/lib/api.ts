@@ -1,6 +1,11 @@
 const BASE = `${import.meta.env.VITE_API_URL ?? ''}/api`;
-export const certificateUrl = (type: 'record' | 'staging', id: string) =>
-  type === 'record' ? `${BASE}/certificate/${id}` : `${BASE}/staging/${id}/certificate`;
+export async function openCertificate(type: 'record' | 'staging', id: string) {
+  const path = type === 'record' ? `/certificate/${id}` : `/staging/${id}/certificate`;
+  const res = await fetch(`${BASE}${path}`, { headers: authHeaders(), redirect: 'follow' });
+  if (!res.ok) throw new Error('Certificate not found');
+  // The signed S3 URL is the final URL after redirect
+  window.open(res.url, '_blank');
+}
 
 function authHeaders(): Record<string, string> {
   const user = import.meta.env.VITE_AUTH_USER ?? 'admin';
