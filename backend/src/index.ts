@@ -6,6 +6,14 @@ import { stagingRoutes } from './routes/staging.js';
 import { recordsRoutes } from './routes/records.js';
 import { downloadRoutes } from './routes/download.js';
 import { checkPassword } from './middleware/auth.js';
+import { runStartupChecks } from './lib/startup.js';
+
+try {
+  await runStartupChecks();
+} catch (e: any) {
+  console.error(e.message);
+  process.exit(1);
+}
 
 const app = Fastify({ logger: true, trustProxy: true });
 

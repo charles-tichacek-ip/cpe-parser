@@ -1,3 +1,5 @@
+import { CLAUDE_MODEL } from '../lib/startup.js';
+
 export interface ParsedCPE {
   provider: string;
   course_title: string;
@@ -72,7 +74,7 @@ export async function parseCPEText(text: string): Promise<ParsedCPE> {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-5-5',
+      model: CLAUDE_MODEL,
       max_tokens: 1000,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: `Parse this CPE document:\n\n${text}` }],

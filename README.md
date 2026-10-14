@@ -113,12 +113,14 @@ cd frontend && npm run dev
 4. Create two services from the monorepo:
    - `backend` — root directory `backend/`, start `npm start`
    - `frontend` — root directory `frontend/`, build `npm run build`, serves on port 8080
-5. Backend variables: `DATABASE_URL`, `ANTHROPIC_API_KEY`, `AUTH_USER`, `AUTH_PASS`, `FRONTEND_URL` (the frontend's public URL, used for CORS), `NODE_ENV=production`, and the bucket variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `BUCKET_NAME`, `BUCKET_ENDPOINT_URL`)
+5. Backend variables: `DATABASE_URL`, `ANTHROPIC_API_KEY`, `CLAUDE_MODEL` (optional, defaults to `claude-sonnet-5-5`), `AUTH_USER`, `AUTH_PASS`, `FRONTEND_URL` (the frontend's public URL, used for CORS), `NODE_ENV=production`, and the bucket variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `BUCKET_NAME`, `BUCKET_ENDPOINT_URL`)
 6. Frontend variables: `VITE_API_URL` (the backend's public URL). This is the only one; nothing secret goes here
 7. Run `db/schema.sql` against Railway Postgres via the dashboard Query tab or the Railway CLI
 8. Optional: add custom domains to both services and set `FRONTEND_URL` / `VITE_API_URL` to match
 
 `AUTH_PASS` is checked by the backend. Use a long, random value.
+
+On boot the backend verifies its env vars, the database, the bucket, and the Claude model, and exits with a clear error if any check fails. Set Railway's healthcheck path to `/health` so a failed deploy never replaces a working one.
 
 ---
 

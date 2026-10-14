@@ -1,7 +1,7 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-const client = new S3Client({
+export const s3 = new S3Client({
   endpoint: process.env.BUCKET_ENDPOINT_URL,
   region: process.env.AWS_REGION ?? 'auto',
   credentials: {
@@ -11,10 +11,10 @@ const client = new S3Client({
   forcePathStyle: true,
 });
 
-const bucket = process.env.BUCKET_NAME!;
+export const bucket = process.env.BUCKET_NAME!;
 
 export async function uploadFile(buffer: Buffer, key: string): Promise<string> {
-  await client.send(new PutObjectCommand({
+  await s3.send(new PutObjectCommand({
     Bucket: bucket,
     Key: key,
     Body: buffer,
@@ -24,5 +24,5 @@ export async function uploadFile(buffer: Buffer, key: string): Promise<string> {
 }
 
 export async function getSignedDownloadUrl(key: string, expiresIn = 3600): Promise<string> {
-  return getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn });
+  return getSignedUrl(s3, new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn });
 }
