@@ -1,4 +1,5 @@
 const BASE = `${import.meta.env.VITE_API_URL ?? ''}/api`;
+export const PASS_KEY = 'cpe_auth_pass';
 export async function openCertificate(type: 'record' | 'staging', id: string) {
   const path = type === 'record' ? `/certificate/${id}` : `/staging/${id}/certificate`;
   const res = await fetch(`${BASE}${path}`, { headers: authHeaders(), redirect: 'follow' });
@@ -9,7 +10,7 @@ export async function openCertificate(type: 'record' | 'staging', id: string) {
 
 function authHeaders(): Record<string, string> {
   const user = import.meta.env.VITE_AUTH_USER ?? 'admin';
-  const pass = import.meta.env.VITE_AUTH_PASS ?? '';
+  const pass = sessionStorage.getItem(PASS_KEY) ?? '';
   if (!pass) return {};
   return {
     Authorization: `Basic ${btoa(`${user}:${pass}`)}`,

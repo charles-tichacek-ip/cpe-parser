@@ -1,24 +1,37 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import './index.css';
+import { PASS_KEY } from './lib/api';
 
-const PASS = import.meta.env.VITE_AUTH_PASS ?? '';
-const SESSION_KEY = 'cpe_auth';
+const API = import.meta.env.VITE_API_URL ?? '';
 
 function PasswordGate({ children }: { children: React.ReactNode }) {
-  const [unlocked, setUnlocked] = useState(sessionStorage.getItem(SESSION_KEY) === PASS);
+  const [unlocked, setUnlocked] = useState(!!sessionStorage.getItem(PASS_KEY));
   const [input, setInput] = useState('');
   const [error, setError] = useState(false);
+  const [checking, setChecking] = useState(false);
 
   if (unlocked) return <>{children}</>;
 
-  function attempt() {
-    if (input === PASS) {
-      sessionStorage.setItem(SESSION_KEY, PASS);
-      setUnlocked(true);
-    } else {
+  async function attempt() {
+    setChecking(true);
+    try {
+      const res = await fetch(`${API}/api/auth`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: input }),
+      });
+      if (res.ok) {
+        sessionStorage.setItem(PASS_KEY, input);
+        setUnlocked(true);
+      } else {
+        setError(true);
+        setInput('');
+      }
+    } catch {
       setError(true);
-      setInput('');
+    } finally {
+      setChecking(false);
     }
   }
 
@@ -37,7 +50,7 @@ function PasswordGate({ children }: { children: React.ReactNode }) {
           placeholder="Password"
         />
         {error && <div style={{ fontSize: 12, color: 'var(--red)' }}>Incorrect password</div>}
-        <button className="btn-primary" onClick={attempt}>Unlock</button>
+        <button className="btn-primary" onClick={attempt} disabled={checking}>{checking ? 'Checking…' : 'Unlock'}</button>
       </div>
     </div>
   );

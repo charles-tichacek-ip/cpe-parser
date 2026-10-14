@@ -98,8 +98,7 @@ NODE_ENV=development
 
 Frontend `.env`:
 ```
-VITE_AUTH_USER=admin
-VITE_AUTH_PASS=your-password
+VITE_API_URL=http://localhost:3001
 ```
 
 **3. Initialize the database**
