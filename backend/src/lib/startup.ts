@@ -2,11 +2,12 @@ import { HeadBucketCommand } from '@aws-sdk/client-s3';
 import { db } from './db.js';
 import { s3, bucket } from './storage.js';
 
-export const CLAUDE_MODEL = process.env.CLAUDE_MODEL ?? 'claude-sonnet-5-5';
+export const CLAUDE_MODEL = process.env.CLAUDE_MODEL!;
 
 const REQUIRED = [
   'DATABASE_URL',
   'ANTHROPIC_API_KEY',
+  'CLAUDE_MODEL',
   'FRONTEND_URL',
   'AWS_ACCESS_KEY_ID',
   'AWS_SECRET_ACCESS_KEY',
