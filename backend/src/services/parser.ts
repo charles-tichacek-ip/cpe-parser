@@ -1,4 +1,4 @@
-import { CLAUDE_MODEL } from '../lib/startup.js';
+import { getModel, resolveModel } from '../lib/model.js';
 
 export interface ParsedCPE {
   provider: string;
@@ -65,8 +65,8 @@ CONFIDENCE:
 - 0.7–0.9: most fields clear, minor inference required
 - Below 0.7: significant fields missing or ambiguous — populate low_conf_fields`;
 
-export async function parseCPEText(text: string): Promise<ParsedCPE> {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+async function callClaude(text: string): Promise<Response> {
+  return fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -74,12 +74,21 @@ export async function parseCPEText(text: string): Promise<ParsedCPE> {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: CLAUDE_MODEL,
+      model: getModel(),
       max_tokens: 1000,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: `Parse this CPE document:\n\n${text}` }],
     }),
   });
+}
+
+export async function parseCPEText(text: string): Promise<ParsedCPE> {
+  let response = await callClaude(text);
+
+  if (response.status === 404) {
+    await resolveModel();
+    response = await callClaude(text);
+  }
 
   if (!response.ok) {
     throw new Error(`Claude API error: ${response.status}`);

@@ -120,6 +120,8 @@ cd frontend && npm run dev
 
 `AUTH_PASS` is checked by the backend. Use a long, random value.
 
+If `CLAUDE_MODEL` is ever deprecated, the backend logs a warning and falls back to the newest Sonnet the API lists, so parsing keeps working until you update the variable.
+
 On boot the backend verifies its env vars, the database, the bucket, and the Claude model, and exits with a clear error if any check fails. Set Railway's healthcheck path to `/health` so a failed deploy never replaces a working one.
 
 ---

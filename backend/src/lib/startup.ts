@@ -1,8 +1,8 @@
 import { HeadBucketCommand } from '@aws-sdk/client-s3';
 import { db } from './db.js';
 import { s3, bucket } from './storage.js';
+import { resolveModel } from './model.js';
 
-export const CLAUDE_MODEL = process.env.CLAUDE_MODEL!;
 
 const REQUIRED = [
   'DATABASE_URL',
@@ -36,15 +36,7 @@ export async function runStartupChecks() {
   await Promise.all([
     check('database', async () => { await db.query('SELECT 1'); }, errors),
     check('bucket', async () => { await s3.send(new HeadBucketCommand({ Bucket: bucket })); }, errors),
-    check(`claude model ${CLAUDE_MODEL}`, async () => {
-      const res = await fetch(`https://api.anthropic.com/v1/models/${encodeURIComponent(CLAUDE_MODEL)}`, {
-        headers: {
-          'x-api-key': process.env.ANTHROPIC_API_KEY!,
-          'anthropic-version': '2023-06-01',
-        },
-      });
-      if (!res.ok) throw new Error(`Anthropic API returned ${res.status} (bad API key or unknown/deprecated model)`);
-    }, errors),
+    check('claude model', resolveModel, errors),
   ]);
 
   if (errors.length) throw new Error(`Startup checks failed:\n  ${errors.join('\n  ')}`);
