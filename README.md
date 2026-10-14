@@ -27,13 +27,14 @@ The hard part of "AI + database" isn't the database — it's the extraction laye
 
 ## Features
 
-- **Upload** — single PDF or ZIP of certificates
+- **Upload** — drop multiple PDFs and/or ZIPs at once; per-file progress
 - **Deduplication** — SHA-256 checksum on every file; duplicates flagged, not blocked
 - **Rename** — files renamed to `YYYY-MM_Provider_Title_Designations.pdf` on ingest
 - **Review** — split-panel UI: list on left, editable detail on right; low-confidence fields highlighted
 - **Accept / Reject** — nothing writes to the main table without explicit approval
 - **Records** — filterable log with checkbox multi-select and ZIP download
-- **Reporting** — compliance dashboard by designation and year (CIA, CISA, CPA Ontario, CITP)
+- **Reporting** — compliance dashboard by designation and year (CIA, CISA, CPA Ontario, CITP), plus CISA 3-year cycle tracking
+- **Auth** — password gate; the password is checked server-side and never bundled into the frontend. Repeated failures lock out the IP for 15 minutes
 
 ### Supported Designations
 
@@ -53,8 +54,8 @@ The hard part of "AI + database" isn't the database — it's the extraction laye
 | Frontend | React + Vite + TypeScript |
 | Backend | Fastify + TypeScript |
 | Database | PostgreSQL (Railway) |
-| Storage | Railway Storage Buckets |
-| AI | Claude claude-sonnet-4-20250514 |
+| Storage | Railway Storage Buckets (S3-compatible, no AWS account needed) |
+| AI | Claude Sonnet 5.5 (`claude-sonnet-5-5`) |
 | Deploy | Railway (monorepo) |
 
 ---
@@ -72,7 +73,7 @@ The hard part of "AI + database" isn't the database — it's the extraction laye
 **1. Clone and install**
 
 ```bash
-git clone https://github.com/yourusername/cpe-parser
+git clone https://github.com/charles-tichacek-ip/cpe-parser
 cd cpe-parser
 
 # Backend
@@ -84,22 +85,9 @@ cd ../frontend && npm install
 
 **2. Configure environment**
 
-Backend `.env`:
-```
-DATABASE_URL=postgresql://...
-ANTHROPIC_API_KEY=sk-ant-...
-STORAGE_BASE_URL=https://...railway.app/storage
-AUTH_USER=admin
-AUTH_PASS=your-password
-PORT=3001
-FRONTEND_URL=http://localhost:5173
-NODE_ENV=development
-```
+Copy `backend/.env.example` to `backend/.env` and `frontend/.env.example` to `frontend/.env`, then fill in the values.
 
-Frontend `.env`:
-```
-VITE_API_URL=http://localhost:3001
-```
+The `AWS_*` / `BUCKET_*` names are the S3-compatible credentials a Railway Storage Bucket provides. They are not AWS credentials. Never prefix secrets with `VITE_`; Vite bundles anything with that prefix into public client JS.
 
 **3. Initialize the database**
 
@@ -121,13 +109,16 @@ cd frontend && npm run dev
 
 1. Push to GitHub
 2. Create a new Railway project
-3. Add a Postgres database service
-4. Add a Storage Bucket
-5. Create two services from the monorepo:
-   - `backend` — root: `backend/`, start: `npm start`
-   - `frontend` — root: `frontend/`, start: `npm run preview`
-6. Set environment variables in the Railway dashboard (never in the repo)
-7. Run `schema.sql` against your Railway Postgres via the Railway CLI or dashboard query editor
+3. Add a Postgres database service and a Storage Bucket
+4. Create two services from the monorepo:
+   - `backend` — root directory `backend/`, start `npm start`
+   - `frontend` — root directory `frontend/`, build `npm run build`, serves on port 8080
+5. Backend variables: `DATABASE_URL`, `ANTHROPIC_API_KEY`, `AUTH_USER`, `AUTH_PASS`, `FRONTEND_URL` (the frontend's public URL, used for CORS), `NODE_ENV=production`, and the bucket variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `BUCKET_NAME`, `BUCKET_ENDPOINT_URL`)
+6. Frontend variables: `VITE_API_URL` (the backend's public URL). This is the only one; nothing secret goes here
+7. Run `db/schema.sql` against Railway Postgres via the dashboard Query tab or the Railway CLI
+8. Optional: add custom domains to both services and set `FRONTEND_URL` / `VITE_API_URL` to match
+
+`AUTH_PASS` is checked by the backend. Use a long, random value.
 
 ---
 
@@ -166,14 +157,17 @@ cpe-parser/
 
 ---
 
+## Notes
+
+CISA 3-year cycle boundaries are hardcoded in `backend/src/routes/records.ts` to one person's ISACA renewal schedule (2026-2028, then every three years). Change them to match yours.
+
 ## Contributing
 
 PRs welcome. Areas most useful:
 
 - Additional designation support (BABL, CITP rules refinement)
-- Triennial compliance tracking (CISA 120-hr rolling window)
-- Ethics hours sub-tracking per designation
-- Railway Storage Bucket client implementation (currently stubbed)
+- Configurable cycle boundaries instead of hardcoded ones
+- Per-designation ethics hour tracking
 
 ---
 
