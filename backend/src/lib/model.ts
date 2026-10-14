@@ -25,8 +25,10 @@ export async function resolveModel(): Promise<void> {
 
   const list = await fetch(`${API}?limit=100`, { headers: headers() });
   if (!list.ok) throw new Error(`Anthropic API returned ${list.status} listing models`);
-  const { data } = (await list.json()) as { data: { id: string }[] };
-  const fallback = data.find(m => m.id.includes('sonnet'))?.id;
+  const { data } = (await list.json()) as { data: { id: string; created_at: string }[] };
+  const fallback = data
+    .filter(m => m.id.startsWith('claude-sonnet'))
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))[0]?.id;
   if (!fallback) throw new Error(`Model ${configured} not found and no Sonnet fallback available`);
 
   console.warn(`WARNING: CLAUDE_MODEL "${configured}" is unavailable (likely deprecated). Falling back to "${fallback}". Update CLAUDE_MODEL in Railway.`);
